@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "961196936155",
+    "project_id": "mindful-planner0",
+    "storage_bucket": "mindful-planner0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:961196936155:android:a24daef13a59126cfa35fe",
+        "android_client_info": {
+          "package_name": "com.example.mindfulplanner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCltDb9scA4VQAi8PepkUXya4k09Df-XGg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
