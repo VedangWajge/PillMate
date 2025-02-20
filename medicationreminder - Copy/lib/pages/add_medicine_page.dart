@@ -133,6 +133,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                     'days': _selectedDays,
                     'startDate': _startDate.toIso8601String(),
                     'endDate': _endDate.toIso8601String(),
+                    'taken': <String, bool>{},
                   };
                   Navigator.pop(context, medicineData);
                 }

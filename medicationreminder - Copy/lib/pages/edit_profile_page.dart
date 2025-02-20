@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 
 class EditProfilePage extends StatefulWidget {
   final Map<String, dynamic> userProfile;
+  final Function(Map<String, dynamic>) onProfileUpdated;
 
-  const EditProfilePage({Key? key, required this.userProfile}) : super(key: key);
+  const EditProfilePage({
+    Key? key,
+    required this.userProfile,
+    required this.onProfileUpdated,
+  }) : super(key: key);
 
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
@@ -48,15 +53,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () {
-              final updatedProfile = {
-                'name': _nameController.text,
-                'email': _emailController.text,
-                'phone': _phoneController.text,
-                'emergencyContact': _emergencyContactController.text,
-                'allergies': _allergiesController.text,
-                'bloodType': _bloodTypeController.text,
-              };
-              Navigator.pop(context, updatedProfile);
+              try {
+                if (_validateInputs()) {
+                  final updatedProfile = {
+                    'name': _nameController.text.trim(),
+                    'email': _emailController.text.trim(),
+                    'phone': _phoneController.text.trim(),
+                    'emergencyContact': _emergencyContactController.text.trim(),
+                    'allergies': _allergiesController.text.trim(),
+                    'bloodType': _bloodTypeController.text.trim(),
+                  };
+                  widget.onProfileUpdated(updatedProfile);
+                  Navigator.pop(context);
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Failed to update profile. Please try again.'),
+                  ),
+                );
+              }
             },
           ),
         ],
@@ -122,5 +138,35 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
       ),
     );
+  }
+
+  bool _validateInputs() {
+    if (_nameController.text.trim().isEmpty) {
+      _showError('Name cannot be empty');
+      return false;
+    }
+    if (!_isValidEmail(_emailController.text.trim())) {
+      _showError('Please enter a valid email');
+      return false;
+    }
+    if (!_isValidPhone(_phoneController.text.trim())) {
+      _showError('Please enter a valid phone number');
+      return false;
+    }
+    return true;
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
+  }
+
+  bool _isValidPhone(String phone) {
+    return RegExp(r'^\+?[\d\s-]{10,}$').hasMatch(phone);
   }
 } 

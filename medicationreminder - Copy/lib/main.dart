@@ -32,21 +32,60 @@ class MedicineReminderApp extends StatelessWidget {
         ),
       ),
       initialRoute: '/',
-      routes: {
-        '/': (context) => WelcomePage(),
-        '/signup': (context) => SignUpPage(),
-        '/login': (context) => LoginPage(),
-        '/home': (context) => HomePage(),
-        '/add-medicine': (context) => AddMedicinePage(),
-        '/calendar': (context) => CalendarPage(
-          takenMedicines: [],
-          onUpdate: () {},
-        ),
-        '/reports': (context) => ReportsPage(
-          medicines: [],
-          takenMedicines: [],
-          onUpdate: () {},
-        ),
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/':
+            return MaterialPageRoute(builder: (_) => WelcomePage());
+          case '/signup':
+            return MaterialPageRoute(builder: (_) => SignUpPage());
+          case '/login':
+            return MaterialPageRoute(builder: (_) => LoginPage());
+          case '/home':
+            return MaterialPageRoute(builder: (_) => HomePage());
+          case '/add-medicine':
+            final medicine = settings.arguments as Map<String, dynamic>?;
+            return MaterialPageRoute(
+              builder: (_) => AddMedicinePage(editMedicine: medicine),
+            );
+          case '/calendar':
+            if (settings.arguments is Map<String, dynamic>) {
+              final args = settings.arguments as Map<String, dynamic>;
+              return MaterialPageRoute(
+                builder: (_) => CalendarPage(
+                  medicines: List<Map<String, dynamic>>.from(args['medicines'] ?? []),
+                  takenMedicines: List<Map<String, dynamic>>.from(args['takenMedicines'] ?? []),
+                  onUpdate: args['onUpdate'] as VoidCallback? ?? (() {}),
+                ),
+              );
+            }
+            return MaterialPageRoute(
+              builder: (_) => CalendarPage(
+                medicines: const [],
+                takenMedicines: const [],
+                onUpdate: () {},
+              ),
+            );
+          case '/reports':
+            if (settings.arguments is Map<String, dynamic>) {
+              final args = settings.arguments as Map<String, dynamic>;
+              return MaterialPageRoute(
+                builder: (_) => ReportsPage(
+                  medicines: List<Map<String, dynamic>>.from(args['medicines'] ?? []),
+                  takenMedicines: List<Map<String, dynamic>>.from(args['takenMedicines'] ?? []),
+                  onUpdate: args['onUpdate'] as VoidCallback? ?? (() {}),
+                ),
+              );
+            }
+            return MaterialPageRoute(
+              builder: (_) => ReportsPage(
+                medicines: const [],
+                takenMedicines: const [],
+                onUpdate: () {},
+              ),
+            );
+          default:
+            return MaterialPageRoute(builder: (_) => WelcomePage());
+        }
       },
     );
   }

@@ -20,18 +20,15 @@ class ReportsPage extends StatefulWidget {
 class _ReportsPageState extends State<ReportsPage> {
   String _selectedPeriod = 'Week';
   final List<String> _periods = ['Week', 'Month', 'Year'];
-  Map<String, dynamic> _adherenceStats = {
-    'total': 0,
-    'taken': 0,
-    'missed': 0,
-    'rate': '0.0'
-  };
+  Map<String, dynamic> _stats = {};
   List<Map<String, dynamic>> _medicationHistory = [];
 
   @override
   void initState() {
     super.initState();
-    _updateStats();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateStats();
+    });
   }
 
   @override
@@ -44,72 +41,42 @@ class _ReportsPageState extends State<ReportsPage> {
 
   void _updateStats() {
     setState(() {
-      _adherenceStats = _calculateAdherenceStats();
+      _stats = {
+        'total': widget.medicines.length,
+        'taken': widget.takenMedicines.length,
+        'missed': _calculateMissedDoses(),
+        'adherence': _calculateAdherenceRate(),
+      };
       _medicationHistory = _generateMedicationHistory();
     });
-    
-    // Call the onUpdate callback to notify HomePage
-    widget.onUpdate();
+    if (mounted) {
+      widget.onUpdate();
+    }
   }
 
-  Map<String, dynamic> _calculateAdherenceStats() {
-    int totalDoses = 0;
-    int takenDoses = 0;
-    
-    // Get the date range based on selected period
-    DateTime now = DateTime.now();
-    DateTime startDate;
-    switch (_selectedPeriod) {
-      case 'Week':
-        startDate = now.subtract(const Duration(days: 7));
-        break;
-      case 'Month':
-        startDate = DateTime(now.year, now.month - 1, now.day);
-        break;
-      case 'Year':
-        startDate = DateTime(now.year - 1, now.month, now.day);
-        break;
-      default:
-        startDate = now.subtract(const Duration(days: 7));
-    }
+  int _calculateMissedDoses() {
+    int totalScheduledDoses = 0;
+    int takenDoses = widget.takenMedicines.length;
 
     for (var medicine in widget.medicines) {
-      List<bool> days = List<bool>.from(medicine['days'] ?? List.generate(7, (index) => true));
       List<String> times = List<String>.from(medicine['times'] ?? []);
-      DateTime medicineStartDate = DateTime.parse(medicine['startDate']);
-      DateTime medicineEndDate = DateTime.parse(medicine['endDate']);
-
-      // Only consider medicines within the selected period
-      if (medicineEndDate.isBefore(startDate) || medicineStartDate.isAfter(now)) {
-        continue;
-      }
-
-      // Calculate doses for each day in the period
-      for (DateTime date = startDate;
-           date.isBefore(now.add(const Duration(days: 1)));
-           date = date.add(const Duration(days: 1))) {
-        if (date.isBefore(medicineStartDate) || date.isAfter(medicineEndDate)) {
-          continue;
-        }
-
-        if (days[date.weekday - 1]) {
-          totalDoses += times.length;
-          // Simulate taken doses (you should replace this with actual tracking data)
-          if (date.isBefore(now)) {
-            takenDoses += times.length;
-          }
-        }
-      }
+      totalScheduledDoses += times.length;
     }
 
-    double adherenceRate = totalDoses > 0 ? (takenDoses / totalDoses) * 100 : 0;
+    return totalScheduledDoses - takenDoses;
+  }
 
-    return {
-      'total': totalDoses,
-      'taken': takenDoses,
-      'missed': totalDoses - takenDoses,
-      'rate': adherenceRate.toStringAsFixed(1),
-    };
+  double _calculateAdherenceRate() {
+    int totalDoses = 0;
+    int takenDoses = widget.takenMedicines.length;
+
+    for (var medicine in widget.medicines) {
+      List<String> times = List<String>.from(medicine['times'] ?? []);
+      totalDoses += times.length;
+    }
+
+    if (totalDoses == 0) return 0.0;
+    return (takenDoses / totalDoses) * 100;
   }
 
   List<Map<String, dynamic>> _generateMedicationHistory() {
@@ -174,43 +141,22 @@ class _ReportsPageState extends State<ReportsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Medicine Reports',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              'Track your medication adherence',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
+    return Column(
+      children: [
+        _buildPeriodSelector(),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _buildAdherenceCard(),
+              const SizedBox(height: 24),
+              _buildAdherenceChart(),
+              const SizedBox(height: 24),
+              _buildMedicationHistory(),
+            ],
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildPeriodSelector(),
-            const SizedBox(height: 24),
-            _buildAdherenceCard(),
-            const SizedBox(height: 24),
-            _buildAdherenceChart(),
-            const SizedBox(height: 24),
-            _buildMedicationHistory(),
-          ],
-        ),
-      ),
+      ],
     );
   }
 
@@ -285,7 +231,7 @@ class _ReportsPageState extends State<ReportsPage> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${_adherenceStats['rate']}%',
+                  '${_stats['adherence']?.toStringAsFixed(1)}%',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -298,9 +244,9 @@ class _ReportsPageState extends State<ReportsPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildAdherenceStats('Taken', _adherenceStats['taken'].toString()),
-              _buildAdherenceStats('Missed', _adherenceStats['missed'].toString()),
-              _buildAdherenceStats('Total', _adherenceStats['total'].toString()),
+              _buildAdherenceStats('Taken', _stats['taken'].toString()),
+              _buildAdherenceStats('Missed', _stats['missed'].toString()),
+              _buildAdherenceStats('Total', _stats['total'].toString()),
             ],
           ),
         ],
