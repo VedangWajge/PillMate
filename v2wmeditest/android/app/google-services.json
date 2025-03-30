@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "192255583085",
+    "project_id": "pillmate-99206",
+    "storage_bucket": "pillmate-99206.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:192255583085:android:55c3e32bdd8c179f76f064",
+        "android_client_info": {
+          "package_name": "com.example.mindfulplanner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "192255583085-o8da27spnhns65j6dec2vroajbi696je.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMN32ADik0KKqKD5l0Zy1L6_S7FqYADZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "192255583085-o8da27spnhns65j6dec2vroajbi696je.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:192255583085:android:90cf9d5974472c9776f064",
+        "android_client_info": {
+          "package_name": "com.example.v2wmeditest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "192255583085-o8da27spnhns65j6dec2vroajbi696je.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMN32ADik0KKqKD5l0Zy1L6_S7FqYADZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "192255583085-o8da27spnhns65j6dec2vroajbi696je.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
